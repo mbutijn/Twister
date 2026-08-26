@@ -37,15 +37,13 @@ public class Twister implements Screen, InputProcessor {
         camera.update();
 
         shape = new ShapeRenderer();
-        shape.setColor(Color.WHITE);
-
         beams = new Array<>();
 
-        Array<Color> colors = new Array<>();
-        colors.add(Color.RED);
-        colors.add(Color.YELLOW);
-        colors.add(Color.GREEN);
-        colors.add(Color.BLUE);
+        Array<String> colors = new Array<>();
+        colors.add("red");
+        colors.add("yellow");
+        colors.add("green");
+        colors.add("blue");
 
         int numberOfArms = 4;
         for (int i = 0; i < numberOfArms; i++) {
@@ -107,29 +105,31 @@ public class Twister implements Screen, InputProcessor {
 //            paused = true;
         }
 
-        shape.setProjectionMatrix(camera.combined);
-        shape.begin(ShapeRenderer.ShapeType.Line);
+        modelBatch.begin(camera);
         for (Beam beam : beams) {
-            beam.draw(shape);
+            beam.draw(modelBatch);
         }
 
-//        drawAxes(shape);
-        shape.end();
-
-        // render the cars
-        modelBatch.begin(camera);
         root.render(modelBatch);
 
-        shape.setColor(Color.BLACK);
-        root.drawBoxEdges(shape);
-
+        // render the cars
         for (Beam beam : beams) {
-            for (SubBeam subBeam : beam.getSubBeams()){
-                subBeam.renderCar(modelBatch, shape);
-            }
+            beam.renderSubRotationSystem(camera, dt);
         }
-        shape.setColor(Color.WHITE);
+
         modelBatch.end();
+
+        shape.setProjectionMatrix(camera.combined);
+        shape.begin(ShapeRenderer.ShapeType.Line);
+//        drawAxes(shape);
+        shape.setColor(Color.BLACK);
+//        root.drawBoxEdges(shape);
+
+//        for (Beam beam : beams) {
+//            beam.drawBoxEdges(shape);
+//        }
+
+        shape.end();
     }
 
     private void drawAxes(ShapeRenderer shape) {
@@ -151,7 +151,6 @@ public class Twister implements Screen, InputProcessor {
             0, 0, 0,
             0, 0, 5
         );
-        shape.setColor(Color.WHITE);
     }
 
     private void handleInput() {
@@ -185,7 +184,6 @@ public class Twister implements Screen, InputProcessor {
             System.out.println("Camera VOF: " + camera.fieldOfView);
         }
 
-
         // Prevent weird camera positions
         cameraPitch = MathUtils.clamp(cameraPitch, 0, 89);
         cameraDistance = Math.max(1f, cameraDistance);
@@ -194,7 +192,7 @@ public class Twister implements Screen, InputProcessor {
     }
 
     public void setPhaseDifferences() {
-        System.out.println("maxPhaseDifference: " + maxPhaseDifference);
+        //System.out.println("maxPhaseDifference: " + maxPhaseDifference);
         int numberOfArms = beams.size;
         for (Beam beam : beams) {
             int i = beams.indexOf(beam, true);
@@ -241,17 +239,17 @@ public class Twister implements Screen, InputProcessor {
             midPointZ = 0;
         }
 
-        // Change the phase differences
+        // Change the phase differences per beam
         if (Gdx.input.isKeyPressed(Input.Keys.PAGE_UP)) {
             targetMaxPhaseDifference += (float) (0.5f * Math.PI);
             targetMaxPhaseDifference = (float) MathUtils.clamp(targetMaxPhaseDifference, 0, 4 * Math.PI);
-            System.out.println("targetMaxPhaseDifference:" + targetMaxPhaseDifference);
+            //System.out.println("targetMaxPhaseDifference:" + targetMaxPhaseDifference);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.PAGE_DOWN)) {
             targetMaxPhaseDifference -= (float) (0.5f * Math.PI);
             targetMaxPhaseDifference = (float) MathUtils.clamp(targetMaxPhaseDifference, 0, 4 * Math.PI);
-            System.out.println("targetMaxPhaseDifference:" + targetMaxPhaseDifference);
+            //System.out.println("targetMaxPhaseDifference:" + targetMaxPhaseDifference);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {

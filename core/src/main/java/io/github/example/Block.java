@@ -7,8 +7,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 
 public class Block {
+    protected float yawAngle, width, height, depth;
     protected ModelInstance box;
-    protected float width, height, depth;
+
+    public void setAndRotateZY(Vector3 vector3, float x, float y, float z, float angle) {
+        vector3.set(x, y, z);
+        vector3.rotateRad(Vector3.Z, angle);
+        vector3.rotateRad(Vector3.Y, yawAngle);
+    }
 
     public void drawBoxEdges(ShapeRenderer shapeRenderer) {
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -34,8 +40,6 @@ public class Block {
             corner.mul(box.transform);
         }
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
         // Bottom
         shapeRenderer.line(corners[0], corners[1]);
         shapeRenderer.line(corners[1], corners[2]);
@@ -54,7 +58,6 @@ public class Block {
         shapeRenderer.line(corners[2], corners[6]);
         shapeRenderer.line(corners[3], corners[7]);
 
-        shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
     }
 }

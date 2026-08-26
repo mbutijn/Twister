@@ -7,4 +7,6 @@ dependencies {
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
+
+  api "com.github.mgsx-dev.gdx-gltf:gltf:2.3.0"
 }
