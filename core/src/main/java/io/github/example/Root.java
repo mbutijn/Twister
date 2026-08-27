@@ -16,21 +16,22 @@ public class Root extends Block {
     public Root() {
         ModelBuilder modelBuilder = new ModelBuilder();
         width = 1.5f;
-        height = 0.5f;
+        height = 2f;
         depth = 1.5f;
         Model boxModel = modelBuilder.createBox(width, height, depth,
-            new Material(ColorAttribute.createDiffuse(Color.GRAY)),
+            new Material(ColorAttribute.createDiffuse(Color.DARK_GRAY)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
         );
 
         box = new ModelInstance(boxModel);
-        rotation = (float) (0.25 * Math.PI);
+        //rotation = (float) (0.25 * Math.PI);
     }
 
     public void update(float rotationIncrease) {
         rotation += rotationIncrease;
         box.transform.idt();
         box.transform.rotateRad(Vector3.Y, rotation);
+        box.transform.setTranslation(0, -1, 0);
     }
 
     public void render(ModelBatch modelBatch){

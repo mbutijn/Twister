@@ -1,7 +1,6 @@
 package io.github.example;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -17,14 +16,9 @@ public class Beam extends Block {
     private final Vector3 end = new Vector3();
     private final Vector3 tmpCorner = new Vector3();
     private final Vector3 tmpEnd = new Vector3();
-    private float phaseDifference;
-    private final SubRotationSystem subRotationSystem;
 
-    public Beam(float baseDirection, float phaseDifference, String color) {
-        this.yawAngle = baseDirection;
-        this.phaseDifference = phaseDifference;
-
-        width = 6.0f;
+    public Beam() {
+        width = 6.5f;
         height = 0.4f;
         depth = 0.4f;
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -34,41 +28,37 @@ public class Beam extends Block {
         );
 
         box = new ModelInstance(boxModel);
-        subRotationSystem = new SubRotationSystem(color);
     }
 
-    public void update(float time, float yawAngleIncrease, float dt) {
-        yawAngle += yawAngleIncrease;
-
-        setAndRotateZY(begin, 1, 0, 0, 0);
-
+    public void update(float yawAngle, float pitch) {
+        setAndRotateZY(begin, 1, 0, 0, 0, yawAngle);
         float length = 6;
-        float pitch = (float) (0.35f + 0.25f * Math.cos(2 * time - phaseDifference));
-        setAndRotateZY(tmpCorner, length, 0, 0, pitch);
+        setAndRotateZY(tmpCorner, length, 0, 0, pitch, yawAngle);
 
         corner.set(begin).add(tmpCorner);
-
         box.transform.idt();
         box.transform.rotateRad(Vector3.Y, yawAngle);
         box.transform.rotateRad(Vector3.Z, pitch);
         box.transform.setTranslation(corner.cpy().add(begin).scl(0.5f));
 
         float standardLength = 0.2f;
-        setAndRotateZY(tmpEnd, length, standardLength, 0, pitch);
+        setAndRotateZY(tmpEnd, length, standardLength, 0, pitch, yawAngle);
         end.set(begin).add(tmpEnd);
-        subRotationSystem.update(end, pitch, dt, yawAngle);
-    }
-
-    public void renderSubRotationSystem(PerspectiveCamera camera, float dt) {
-        subRotationSystem.render(camera, dt);
     }
 
     public void draw(ModelBatch modelBatch) {
         modelBatch.render(box);
     }
 
-    public void setPhaseDifference(float phaseDifference) {
-        this.phaseDifference = phaseDifference;
+    public Vector3 getEnd() {
+        return end;
     }
 
+    public Vector3 getAttachment() {
+        return corner.cpy().sub(begin).scl(0.75f);
+    }
+
+    public Vector3 getBegin() {
+        return begin;
+    }
 }

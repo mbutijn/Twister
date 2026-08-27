@@ -7,13 +7,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 
 public class Block {
-    protected float yawAngle, width, height, depth;
+    protected float width, height, depth;
     protected ModelInstance box;
 
-    public void setAndRotateZY(Vector3 vector3, float x, float y, float z, float angle) {
+    public void setAndRotateZY(Vector3 vector3, float x, float y, float z, float angleZ, float angleY) {
         vector3.set(x, y, z);
-        vector3.rotateRad(Vector3.Z, angle);
-        vector3.rotateRad(Vector3.Y, yawAngle);
+        vector3.rotateRad(Vector3.Z, angleZ);
+        vector3.rotateRad(Vector3.Y, angleY);
     }
 
     public void drawBoxEdges(ShapeRenderer shapeRenderer) {

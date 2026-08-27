@@ -22,7 +22,8 @@ public class Twister implements Screen, InputProcessor {
     private float midPointZ = 0f;
     private int touchDownY, touchDownX;
 
-    private final Array<Beam> beams;
+//    private final Array<Beam> beams;
+    private final Array<RotationArm> rotationArms;
     private float time = 0;
     private float maxPhaseDifference = (float) Math.PI;
     private float targetMaxPhaseDifference = (float) Math.PI;
@@ -37,7 +38,8 @@ public class Twister implements Screen, InputProcessor {
         camera.update();
 
         shape = new ShapeRenderer();
-        beams = new Array<>();
+//        beams = new Array<>();
+        rotationArms = new Array<>();
 
         Array<String> colors = new Array<>();
         colors.add("red");
@@ -47,7 +49,7 @@ public class Twister implements Screen, InputProcessor {
 
         int numberOfArms = 4;
         for (int i = 0; i < numberOfArms; i++) {
-            beams.add(new Beam(
+            rotationArms.add(new RotationArm(
                 (float) (i * 2 * Math.PI / numberOfArms),
                 i * maxPhaseDifference / numberOfArms,
                 colors.get(i)));
@@ -99,37 +101,38 @@ public class Twister implements Screen, InputProcessor {
 
             float rotationAngleIncrease = 0.75f * dt;
             root.update(rotationAngleIncrease);
-            for (Beam beam : beams) {
-                beam.update(time, rotationAngleIncrease, dt);
+            for (RotationArm rotationArm : rotationArms) {
+                rotationArm.update(time, rotationAngleIncrease, dt);
             }
 //            paused = true;
         }
 
         modelBatch.begin(camera);
-        for (Beam beam : beams) {
-            beam.draw(modelBatch);
+        for (RotationArm rotationArm : rotationArms) {
+            rotationArm.getBeam().draw(modelBatch);
+            rotationArm.drawHydraulics(modelBatch);
         }
 
         root.render(modelBatch);
 
         // render the cars
-        for (Beam beam : beams) {
-            beam.renderSubRotationSystem(camera, dt);
+        for (RotationArm rotationArm : rotationArms) {
+            rotationArm.renderSubRotationSystem(camera, dt);
         }
 
         modelBatch.end();
 
-        shape.setProjectionMatrix(camera.combined);
-        shape.begin(ShapeRenderer.ShapeType.Line);
+//        shape.setProjectionMatrix(camera.combined);
+//        shape.begin(ShapeRenderer.ShapeType.Line);
 //        drawAxes(shape);
-        shape.setColor(Color.BLACK);
+//        shape.setColor(Color.BLACK);
 //        root.drawBoxEdges(shape);
-
-//        for (Beam beam : beams) {
-//            beam.drawBoxEdges(shape);
+//
+//        for (RotationArm rotationArm : rotationArms) {
+//            rotationArm.getBeam().drawBoxEdges(shape);
 //        }
-
-        shape.end();
+//
+//        shape.end();
     }
 
     private void drawAxes(ShapeRenderer shape) {
@@ -193,10 +196,11 @@ public class Twister implements Screen, InputProcessor {
 
     public void setPhaseDifferences() {
         //System.out.println("maxPhaseDifference: " + maxPhaseDifference);
-        int numberOfArms = beams.size;
-        for (Beam beam : beams) {
-            int i = beams.indexOf(beam, true);
-            beam.setPhaseDifference(i * maxPhaseDifference / numberOfArms);
+        int numberOfArms = rotationArms.size;
+        for (RotationArm rotationArm : rotationArms) {
+            int i = rotationArms.indexOf(rotationArm, true);
+            //rotationArm.getBeam().setPhaseDifference(i * maxPhaseDifference / numberOfArms);
+            rotationArm.setPhaseDifference(i * maxPhaseDifference / numberOfArms);
         }
     }
 
