@@ -33,8 +33,8 @@ public class SubRotationSystem {
         yawAngle = 0;
     }
 
-    public void update(Vector3 position, float pitch, float dt, float yawAngleBeam) {
-        this.yawAngle += 2 * dt;
+    public void update(Vector3 position, float pitch, float yawAngleIncrease, float yawAngleBeam) {
+        this.yawAngle += yawAngleIncrease;
         float yawAngleDifference = yawAngleBeam - yawAngle;
         float pitchLocal = (float) (pitch * Math.cos(yawAngleDifference));
 

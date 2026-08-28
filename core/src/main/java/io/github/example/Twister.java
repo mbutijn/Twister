@@ -9,11 +9,11 @@ import com.badlogic.gdx.math.MathUtils;
 
 public class Twister implements Screen, InputProcessor {
     private final PerspectiveCamera camera;
+    private final Controller controller;
     private final ShapeRenderer shape;
     private final com.badlogic.gdx.math.Vector3 cameraPos = new com.badlogic.gdx.math.Vector3();
     private final ModelBatch modelBatch = new ModelBatch();
     private final Root root = new Root();
-
     private float cameraAngle = 45f;
     private float cameraPitch = 30f;
     private float cameraDistance = 20f;
@@ -25,6 +25,7 @@ public class Twister implements Screen, InputProcessor {
     private float time = 0;
     private float maxPhaseDifference = (float) Math.PI;
     private float targetMaxPhaseDifference = (float) Math.PI;
+    private float rotationSpeed, pitchAmplitude;
     private boolean paused;
 
     public Twister() {
@@ -37,6 +38,9 @@ public class Twister implements Screen, InputProcessor {
 
         shape = new ShapeRenderer();
         rotationArms = new Array<>();
+        controller = new Controller();
+        rotationSpeed = controller.getTargetRotationSpeed();
+        pitchAmplitude = controller.getTargetPitchAmplitude();
 
         Array<String> colors = new Array<>();
         colors.add("red");
@@ -53,7 +57,10 @@ public class Twister implements Screen, InputProcessor {
         }
 
         // Set up the input processor
-        Gdx.input.setInputProcessor(this);
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(controller.getStage());
+        multiplexer.addProcessor(this);
+        Gdx.input.setInputProcessor(multiplexer);
         updateCamera();
     }
 
@@ -84,22 +91,17 @@ public class Twister implements Screen, InputProcessor {
         float dt = Gdx.graphics.getDeltaTime();
 
         if (!paused) {
-            time += dt;
+            rotationSpeed = changeValue(rotationSpeed, controller.getTargetRotationSpeed(), 0.005f);
+            pitchAmplitude = changeValue(pitchAmplitude, controller.getTargetPitchAmplitude(), 0.005f);
+            maxPhaseDifference = changeValue(maxPhaseDifference, targetMaxPhaseDifference, 0.01f);
+            setPhaseDifferences();
 
-            float difference = targetMaxPhaseDifference - maxPhaseDifference;
-            if (difference > 0) {
-                maxPhaseDifference = difference > 0.01f ? maxPhaseDifference + 0.01f : targetMaxPhaseDifference;
-                setPhaseDifferences();
-            }
-            if (difference < 0) {
-                maxPhaseDifference = difference < -0.01f ? maxPhaseDifference - 0.01f : targetMaxPhaseDifference;
-                setPhaseDifferences();
-            }
+            float speed = dt * rotationSpeed;
+            time += speed / 0.75f;
 
-            float rotationAngleIncrease = 0.75f * dt;
-            root.update(rotationAngleIncrease);
+            root.update(speed);
             for (RotationArm rotationArm : rotationArms) {
-                rotationArm.update(time, rotationAngleIncrease, dt);
+                rotationArm.update(time, speed, pitchAmplitude);
             }
 //            paused = true;
         }
@@ -130,6 +132,21 @@ public class Twister implements Screen, InputProcessor {
 //        }
 //
 //        shape.end();
+
+        controller.update(delta);
+        controller.render();
+
+    }
+
+    private float changeValue(float value, float targetValue, float increment) {
+        float difference = targetValue - value;
+        if (difference > 0) {
+            value = difference > increment ? value + increment : targetValue;
+        }
+        if (difference < 0) {
+            value = difference < -increment ? value - increment : targetValue;
+        }
+        return  value;
     }
 
     private void drawAxes(ShapeRenderer shape) {
