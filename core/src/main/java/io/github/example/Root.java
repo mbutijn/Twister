@@ -10,21 +10,20 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 
-public class Root extends Block {
+public class Root extends SimpleModel {
     private float rotation;
 
     public Root() {
         ModelBuilder modelBuilder = new ModelBuilder();
-        width = 1.5f;
-        height = 2f;
-        depth = 1.5f;
+        width = 2.0f;
+        height = 2.0f;
+        depth = 2.0f;
         Model boxModel = modelBuilder.createBox(width, height, depth,
             new Material(ColorAttribute.createDiffuse(Color.DARK_GRAY)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
         );
 
         box = new ModelInstance(boxModel);
-        //rotation = (float) (0.25 * Math.PI);
     }
 
     public void update(float rotationIncrease) {

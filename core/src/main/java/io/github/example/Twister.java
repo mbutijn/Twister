@@ -17,12 +17,10 @@ public class Twister implements Screen, InputProcessor {
     private float cameraAngle = 45f;
     private float cameraPitch = 30f;
     private float cameraDistance = 20f;
-    private float midPointX = 0f;
-    private float midPointY = 1f;
-    private float midPointZ = 0f;
+    private float cameraFocusX = 0f;
+    private float cameraFocusY = 1f;
+    private float cameraFocusZ = 0f;
     private int touchDownY, touchDownX;
-
-//    private final Array<Beam> beams;
     private final Array<RotationArm> rotationArms;
     private float time = 0;
     private float maxPhaseDifference = (float) Math.PI;
@@ -32,13 +30,12 @@ public class Twister implements Screen, InputProcessor {
     public Twister() {
         camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        camera.lookAt(0, 0, 0);
+        camera.lookAt(cameraFocusX, cameraFocusY, cameraFocusZ);
         camera.near = 0.1f;
         camera.far = 1000f;
         camera.update();
 
         shape = new ShapeRenderer();
-//        beams = new Array<>();
         rotationArms = new Array<>();
 
         Array<String> colors = new Array<>();
@@ -68,7 +65,7 @@ public class Twister implements Screen, InputProcessor {
         cameraPos.set(horizontalDistance, y, 0f);
         cameraPos.rotate(com.badlogic.gdx.math.Vector3.Y, cameraAngle);
         camera.position.set(cameraPos);
-        camera.lookAt(midPointX, midPointY, midPointZ);
+        camera.lookAt(cameraFocusX, cameraFocusY, cameraFocusZ);
         camera.up.set(0, 1, 0);
         camera.update();
     }
@@ -157,38 +154,26 @@ public class Twister implements Screen, InputProcessor {
     }
 
     private void handleInput() {
-        // Rotate horizontally
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            midPointX += (0.1f * MathUtils.cosDeg(cameraAngle));
-            midPointZ += (0.1f * MathUtils.sinDeg(cameraAngle));
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            midPointX -= (0.1f * MathUtils.cosDeg(cameraAngle));
-            midPointZ -= (0.1f * MathUtils.sinDeg(cameraAngle));
-        }
-
-        // Rotate vertically
+        // Shift camera vertically
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            midPointX += 0.1f * MathUtils.sinDeg(cameraPitch) * MathUtils.cosDeg(cameraAngle);
-            midPointY += 0.1f * MathUtils.cosDeg(cameraPitch);
-            midPointZ += 0.1f * MathUtils.sinDeg(cameraPitch) * MathUtils.sinDeg(cameraAngle);
+            cameraFocusY += 0.1f;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            midPointX -= 0.1f * MathUtils.sinDeg(cameraPitch) * MathUtils.cosDeg(cameraAngle);
-            midPointY -= 0.1f * MathUtils.cosDeg(cameraPitch);
-            midPointZ -= 0.1f * MathUtils.sinDeg(cameraPitch) * MathUtils.sinDeg(cameraAngle);
+            cameraFocusY -= 0.1f;
         }
+
+        // Change field of view
         if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
             camera.fieldOfView += 0.1f;
-            System.out.println("Camera VOF: " + camera.fieldOfView);
+            System.out.println("Camera FOV: " + camera.fieldOfView);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
             camera.fieldOfView -= 0.1f;
-            System.out.println("Camera VOF: " + camera.fieldOfView);
+            System.out.println("Camera FOV: " + camera.fieldOfView);
         }
 
         // Prevent weird camera positions
-        cameraPitch = MathUtils.clamp(cameraPitch, 0, 89);
+        cameraPitch = MathUtils.clamp(cameraPitch, -30, 89);
         cameraDistance = Math.max(1f, cameraDistance);
 
         updateCamera();
@@ -199,7 +184,6 @@ public class Twister implements Screen, InputProcessor {
         int numberOfArms = rotationArms.size;
         for (RotationArm rotationArm : rotationArms) {
             int i = rotationArms.indexOf(rotationArm, true);
-            //rotationArm.getBeam().setPhaseDifference(i * maxPhaseDifference / numberOfArms);
             rotationArm.setPhaseDifference(i * maxPhaseDifference / numberOfArms);
         }
     }
@@ -238,9 +222,9 @@ public class Twister implements Screen, InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) { // reset function
-            midPointX = 0;
-            midPointY = 1;
-            midPointZ = 0;
+            cameraFocusX = 0;
+            cameraFocusY = 1;
+            cameraFocusZ = 0;
         }
 
         // Change the phase differences per beam

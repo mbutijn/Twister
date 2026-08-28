@@ -11,7 +11,7 @@ import net.mgsx.gltf.scene3d.scene.SceneManager;
 public class SubRotationSystem {
     private final Scene scene;
     private final SceneManager sceneManager;
-    public float yawAngle;
+    private float yawAngle;
 
     public SubRotationSystem (String color) {
         AssetManager assetManager = new AssetManager();

@@ -20,11 +20,11 @@ public class RotationArm {
 
     public void update(float time, float yawAngleIncrease, float dt) {
         yawAngle += yawAngleIncrease;
-        float pitch = (float) (0.35f + 0.25f * Math.cos(2 * time - phaseDifference));
+        float pitch = (float) (0.2f + 0.4f * Math.cos(2 * time - phaseDifference));
         beam.update(yawAngle, pitch);
         subRotationSystem.update(beam.getEnd(), pitch, dt, yawAngle);
 
-        hydraulicCylinder.update(yawAngle, beam.getAttachment(), beam.getBegin());
+        hydraulicCylinder.update(yawAngle, beam.getAttachment(), beam.getRootHinge());
     }
 
     public void drawHydraulics(ModelBatch modelBatch) {
