@@ -22,6 +22,7 @@ public class Twister implements Screen, InputProcessor {
     private float cameraFocusZ = 0f;
     private int touchDownY, touchDownX;
     private final Array<RotationArm> rotationArms;
+    private final Ground ground;
     private float time = 0;
     private boolean paused;
 
@@ -34,6 +35,7 @@ public class Twister implements Screen, InputProcessor {
         camera.update();
 
         shape = new ShapeRenderer();
+        ground = new Ground();
         rotationArms = new Array<>();
         controller = new Controller();
         controller.updateTimeDependentValues();
@@ -78,12 +80,8 @@ public class Twister implements Screen, InputProcessor {
         handleInput();
 
         // Clear screen
-        Gdx.gl.glClearColor(0.05f, 0.25f, 0.15f, 1);
-        Gdx.gl.glClear(
-            GL20.GL_COLOR_BUFFER_BIT |
-                GL20.GL_DEPTH_BUFFER_BIT
-        );
-
+        Gdx.gl.glClearColor(0.5f, 0.75f, 1.0f, 1.0f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         float dt = Gdx.graphics.getDeltaTime();
 
         if (!paused) {
@@ -103,6 +101,8 @@ public class Twister implements Screen, InputProcessor {
         }
 
         modelBatch.begin(camera);
+        ground.render(modelBatch);
+
         for (RotationArm rotationArm : rotationArms) {
             rotationArm.getBeam().draw(modelBatch);
             rotationArm.drawHydraulics(modelBatch);
@@ -126,10 +126,10 @@ public class Twister implements Screen, InputProcessor {
 //        for (RotationArm rotationArm : rotationArms) {
 //            rotationArm.getBeam().drawBoxEdges(shape);
 //        }
-//
 //        shape.end();
 
         controller.update(delta);
+        controller.drawTrueValues();
         controller.render();
 
     }
