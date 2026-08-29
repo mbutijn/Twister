@@ -23,9 +23,6 @@ public class Twister implements Screen, InputProcessor {
     private int touchDownY, touchDownX;
     private final Array<RotationArm> rotationArms;
     private float time = 0;
-    private float maxPhaseDifference = (float) Math.PI;
-    private float targetMaxPhaseDifference = (float) Math.PI;
-    private float rotationSpeed, pitchAmplitude;
     private boolean paused;
 
     public Twister() {
@@ -39,8 +36,7 @@ public class Twister implements Screen, InputProcessor {
         shape = new ShapeRenderer();
         rotationArms = new Array<>();
         controller = new Controller();
-        rotationSpeed = controller.getTargetRotationSpeed();
-        pitchAmplitude = controller.getTargetPitchAmplitude();
+        controller.updateTimeDependentValues();
 
         Array<String> colors = new Array<>();
         colors.add("red");
@@ -52,7 +48,7 @@ public class Twister implements Screen, InputProcessor {
         for (int i = 0; i < numberOfArms; i++) {
             rotationArms.add(new RotationArm(
                 (float) (i * 2 * Math.PI / numberOfArms),
-                i * maxPhaseDifference / numberOfArms,
+                i * controller.getMaxPhaseDifference() / numberOfArms,
                 colors.get(i)));
         }
 
@@ -91,17 +87,17 @@ public class Twister implements Screen, InputProcessor {
         float dt = Gdx.graphics.getDeltaTime();
 
         if (!paused) {
-            rotationSpeed = changeValue(rotationSpeed, controller.getTargetRotationSpeed(), 0.005f);
-            pitchAmplitude = changeValue(pitchAmplitude, controller.getTargetPitchAmplitude(), 0.005f);
-            maxPhaseDifference = changeValue(maxPhaseDifference, targetMaxPhaseDifference, 0.01f);
-            setPhaseDifferences();
+            controller.updateTimeDependentValues();
+            if (controller.isPhaseDifferenceNeedsChange()) {
+                setPhaseDifferences();
+            }
 
-            float speed = dt * rotationSpeed;
+            float speed = dt * controller.getRotationSpeedMain();
             time += speed / 0.75f;
 
             root.update(speed);
             for (RotationArm rotationArm : rotationArms) {
-                rotationArm.update(time, speed, pitchAmplitude);
+                rotationArm.update(time, speed, controller.getRotationSpeedSub() * dt, controller.getPitchEquilibrium(), controller.getPitchAmplitude());
             }
 //            paused = true;
         }
@@ -136,17 +132,6 @@ public class Twister implements Screen, InputProcessor {
         controller.update(delta);
         controller.render();
 
-    }
-
-    private float changeValue(float value, float targetValue, float increment) {
-        float difference = targetValue - value;
-        if (difference > 0) {
-            value = difference > increment ? value + increment : targetValue;
-        }
-        if (difference < 0) {
-            value = difference < -increment ? value - increment : targetValue;
-        }
-        return  value;
     }
 
     private void drawAxes(ShapeRenderer shape) {
@@ -201,7 +186,7 @@ public class Twister implements Screen, InputProcessor {
         int numberOfArms = rotationArms.size;
         for (RotationArm rotationArm : rotationArms) {
             int i = rotationArms.indexOf(rotationArm, true);
-            rotationArm.setPhaseDifference(i * maxPhaseDifference / numberOfArms);
+            rotationArm.setPhaseDifference(i * controller.getMaxPhaseDifference() / numberOfArms);
         }
     }
 
@@ -242,19 +227,6 @@ public class Twister implements Screen, InputProcessor {
             cameraFocusX = 0;
             cameraFocusY = 1;
             cameraFocusZ = 0;
-        }
-
-        // Change the phase differences per beam
-        if (Gdx.input.isKeyPressed(Input.Keys.PAGE_UP)) {
-            targetMaxPhaseDifference += (float) (0.5f * Math.PI);
-            targetMaxPhaseDifference = (float) MathUtils.clamp(targetMaxPhaseDifference, 0, 4 * Math.PI);
-            //System.out.println("targetMaxPhaseDifference:" + targetMaxPhaseDifference);
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.PAGE_DOWN)) {
-            targetMaxPhaseDifference -= (float) (0.5f * Math.PI);
-            targetMaxPhaseDifference = (float) MathUtils.clamp(targetMaxPhaseDifference, 0, 4 * Math.PI);
-            //System.out.println("targetMaxPhaseDifference:" + targetMaxPhaseDifference);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
