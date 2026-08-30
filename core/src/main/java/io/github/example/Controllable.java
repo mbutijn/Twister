@@ -14,9 +14,23 @@ public class Controllable {
     public Controllable(float minValue, float maxValue, float step, float setValue, Slider.SliderStyle sliderStyle, Slider.SliderStyle progressStyle) {
         this.slider = new Slider(minValue, maxValue, step, true, sliderStyle);
         progressBar = new ProgressBar(minValue, maxValue, step, true, progressStyle);
-        addDimensionsToProgressBar(progressBar);
+        setProperties(setValue);
+    }
+
+    public Controllable(Slider.SliderStyle sliderStyle, Slider.SliderStyle progressStyle) {
+        this.slider = new LimitedSlider(0, 0.4f, 0.01f, true, sliderStyle);
+        progressBar = new ProgressBar(0, 0.4f, 0.01f, true, progressStyle);
+        setProperties(0.4f);
+    }
+
+    public void setProperties(float setValue) {
         progressBar.setValue(setValue);
-        addDimensionsToSlider(slider);
+//        slider.setWidth(30);
+//        slider.setHeight(300);
+//        slider.setPosition(30, 250);
+//        progressBar.setWidth(5);
+//        progressBar.setHeight(300);
+//        progressBar.setPosition(30, 250);
         slider.setValue(setValue);
         targetValue = setValue;
     }
@@ -30,21 +44,9 @@ public class Controllable {
         });
     }
 
-    private void addDimensionsToSlider(Slider slider) {
-        slider.setWidth(30);
-        slider.setHeight(300);
-        slider.setPosition(30, 250);
-    }
-
-    private void addDimensionsToProgressBar(ProgressBar progressBar) {
-        progressBar.setWidth(10);
-        progressBar.setHeight(300);
-        progressBar.setPosition(30, 250);
-    }
-
     public void addToTable(Table table) {
-        table.add(slider).width(10).pad(15);
-        table.add(progressBar).width(10).pad(5);
+        table.add(slider).width(10).pad(1);
+        table.add(progressBar).width(5).pad(10);
     }
 
     public void updateProgressBarValue(float trueValue) {
@@ -61,5 +63,9 @@ public class Controllable {
 
     public Slider getSlider() {
         return slider;
+    }
+
+    public LimitedSlider getLimitedSlider() {
+        return (LimitedSlider) slider;
     }
 }
