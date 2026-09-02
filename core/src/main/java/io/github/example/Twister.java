@@ -5,35 +5,21 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.math.MathUtils;
 
 public class Twister implements Screen, InputProcessor {
-    private final PerspectiveCamera camera;
+    private final TwisterCamera twisterCamera;
     private final Controller controller;
     private final ShapeRenderer shape;
-    private final com.badlogic.gdx.math.Vector3 cameraPos = new com.badlogic.gdx.math.Vector3();
     private final ModelBatch modelBatch = new ModelBatch();
     private final Root root = new Root();
-    private float cameraAngle = 45f;
-    private float cameraPitch = 30f;
-    private float cameraDistance = 20f;
-    private float cameraFocusX = 0f;
-    private float cameraFocusY = 1f;
-    private float cameraFocusZ = 0f;
-    private int touchDownY, touchDownX;
     private final Array<RotationArm> rotationArms;
     private final Ground ground;
     private float time = 0;
+    private int touchDownY, touchDownX;
     private boolean paused;
 
     public Twister() {
-        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-        camera.lookAt(cameraFocusX, cameraFocusY, cameraFocusZ);
-        camera.near = 0.1f;
-        camera.far = 1000f;
-        camera.update();
-
+        twisterCamera = new TwisterCamera();
         shape = new ShapeRenderer();
         ground = new Ground();
         rotationArms = new Array<>();
@@ -59,25 +45,12 @@ public class Twister implements Screen, InputProcessor {
         multiplexer.addProcessor(controller.getStage());
         multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(multiplexer);
-        updateCamera();
-    }
-
-    private void updateCamera() {
-        // Use MathUtils helpers and a reusable cameraPos to avoid allocations
-        float horizontalDistance = cameraDistance * MathUtils.cosDeg(cameraPitch);
-        float y = cameraDistance * MathUtils.sinDeg(cameraPitch);
-        // start at +X on the horizontal plane then rotate around Y by the heading angle
-        cameraPos.set(horizontalDistance, y, 0f);
-        cameraPos.rotate(com.badlogic.gdx.math.Vector3.Y, cameraAngle);
-        camera.position.set(cameraPos);
-        camera.lookAt(cameraFocusX, cameraFocusY, cameraFocusZ);
-        camera.up.set(0, 1, 0);
-        camera.update();
+        twisterCamera.update();
     }
 
     @Override
     public void render(float delta) {
-        handleInput();
+        twisterCamera.handleInput();
 
         // Clear screen
         Gdx.gl.glClearColor(0.5f, 0.75f, 1.0f, 1.0f);
@@ -100,7 +73,7 @@ public class Twister implements Screen, InputProcessor {
 //            paused = true;
         }
 
-        modelBatch.begin(camera);
+        modelBatch.begin(twisterCamera.getPerspectiveCamera());
         ground.render(modelBatch);
 
         for (RotationArm rotationArm : rotationArms) {
@@ -110,9 +83,9 @@ public class Twister implements Screen, InputProcessor {
 
         root.render(modelBatch);
 
-        // render the cars
+        // render the car systems
         for (RotationArm rotationArm : rotationArms) {
-            rotationArm.renderSubRotationSystem(camera, dt);
+            rotationArm.renderSubRotationSystem(twisterCamera.getPerspectiveCamera(), dt);
         }
 
         modelBatch.end();
@@ -131,7 +104,6 @@ public class Twister implements Screen, InputProcessor {
         controller.update(delta);
         controller.drawTrueValues();
         controller.render();
-
     }
 
     private void drawAxes(ShapeRenderer shape) {
@@ -155,32 +127,6 @@ public class Twister implements Screen, InputProcessor {
         );
     }
 
-    private void handleInput() {
-        // Shift camera vertically
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            cameraFocusY += 0.1f;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            cameraFocusY -= 0.1f;
-        }
-
-        // Change field of view
-        if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
-            camera.fieldOfView += 0.1f;
-            System.out.println("Camera FOV: " + camera.fieldOfView);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
-            camera.fieldOfView -= 0.1f;
-            System.out.println("Camera FOV: " + camera.fieldOfView);
-        }
-
-        // Prevent weird camera positions
-        cameraPitch = MathUtils.clamp(cameraPitch, -30, 89);
-        cameraDistance = Math.max(1f, cameraDistance);
-
-        updateCamera();
-    }
-
     public void setPhaseDifferences() {
         //System.out.println("maxPhaseDifference: " + maxPhaseDifference);
         int numberOfArms = rotationArms.size;
@@ -196,9 +142,7 @@ public class Twister implements Screen, InputProcessor {
 
     @Override
     public void resize(int width, int height) {
-        camera.viewportWidth = width;
-        camera.viewportHeight = height;
-        camera.update();
+        twisterCamera.resize(width, height);
     }
 
     @Override
@@ -224,9 +168,7 @@ public class Twister implements Screen, InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) { // reset function
-            cameraFocusX = 0;
-            cameraFocusY = 1;
-            cameraFocusZ = 0;
+            twisterCamera.resetMiddlePoint();
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
@@ -264,8 +206,7 @@ public class Twister implements Screen, InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        cameraAngle -= 0.25f * (screenX - touchDownX);
-        cameraPitch += 0.25f * (screenY - touchDownY);
+        twisterCamera.handleDragged(screenX - touchDownX, screenY - touchDownY);
 
         touchDownX = screenX;
         touchDownY = screenY;
@@ -279,7 +220,7 @@ public class Twister implements Screen, InputProcessor {
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        cameraDistance += amountY;
+        twisterCamera.handleScrolled(amountY);
         return false;
     }
 }

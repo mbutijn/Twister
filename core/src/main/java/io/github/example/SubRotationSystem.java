@@ -2,6 +2,7 @@ package io.github.example;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import net.mgsx.gltf.loaders.glb.GLBAssetLoader;
 import net.mgsx.gltf.scene3d.scene.Scene;
@@ -36,14 +37,14 @@ public class SubRotationSystem {
     public void update(Vector3 position, float pitch, float yawAngleIncrease, float yawAngleBeam) {
         this.yawAngle += yawAngleIncrease;
         float yawAngleDifference = yawAngleBeam - yawAngle;
-        float pitchLocal = (float) (pitch * Math.cos(yawAngleDifference));
+        float pitchLocal = pitch * MathUtils.cos(yawAngleDifference);
 
         scene.modelInstance.transform.idt();
         scene.modelInstance.transform.setToTranslation(position);
 
         scene.modelInstance.transform.rotateRad(Vector3.Y, yawAngle);
         scene.modelInstance.transform.rotateRad(Vector3.Z, pitchLocal);
-        scene.modelInstance.transform.rotateRad(Vector3.X, pitch * (float) (Math.sin(yawAngleDifference)));
+        scene.modelInstance.transform.rotateRad(Vector3.X, pitch * MathUtils.sin(yawAngleDifference));
     }
 
     public void render(PerspectiveCamera camera, float dt) {

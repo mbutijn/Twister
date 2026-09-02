@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 public class HydraulicCylinder extends SimpleModel {
@@ -35,7 +36,7 @@ public class HydraulicCylinder extends SimpleModel {
         setAndRotateZY(attachmentRoot, 0, -1.5f, 0, 0, yawAngle);
 
         Vector3 hydraulicVector = beamAttachment.cpy().sub(attachmentRoot);
-        float pitch = (float) (Math.asin(hydraulicVector.nor().y) - 0.5 * Math.PI);
+        float pitch = MathUtils.asin(hydraulicVector.nor().y) - 0.5f * MathUtils.PI;
 
         cylinderDown.transform.idt();
         cylinderDown.transform.translate(hydraulicVector.scl(1.0f).add(rootHinge).add(0,-1.5f,0));
