@@ -10,6 +10,7 @@ public class Controllable {
     private final Slider slider;
     private final ProgressBar progressBar;
     private float targetValue;
+    private float defaultValue;
 
     public Controllable(float minValue, float maxValue, float step, float setValue, Slider.SliderStyle sliderStyle, Slider.SliderStyle progressStyle) {
         this.slider = new Slider(minValue, maxValue, step, true, sliderStyle);
@@ -33,6 +34,7 @@ public class Controllable {
 //        progressBar.setPosition(30, 250);
         slider.setValue(setValue);
         targetValue = setValue;
+        defaultValue = setValue;
     }
 
     protected void addNormalListener() {
@@ -51,6 +53,21 @@ public class Controllable {
 
     public void updateProgressBarValue(float trueValue) {
         progressBar.setValue(trueValue);
+    }
+
+    public void setToZero() {
+        targetValue = 0;
+        slider.setValue(0);
+    }
+
+    public void setToMinimum() {
+        targetValue = slider.getMinValue();
+        slider.setValue(targetValue);
+    }
+
+    public void setToDefault() {
+        targetValue = defaultValue;
+        slider.setValue(targetValue);
     }
 
     public void setTargetValue(float targetValue) {

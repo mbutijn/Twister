@@ -64,7 +64,7 @@ public class Twister implements Screen, InputProcessor {
             }
 
             float speed = dt * controller.getRotationSpeedMain();
-            time += speed / 0.75f;
+            time += dt * controller.getPitchFrequency();
 
             root.update(speed);
             for (RotationArm rotationArm : rotationArms) {

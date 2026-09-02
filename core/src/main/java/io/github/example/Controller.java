@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -13,8 +14,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 public class Controller {
     private final Stage stage;
-    private final Controllable rotationSpeedMainControllable, rotationSpeedSubControllable, pitchEquilibriumControllable, maxPhaseDifferenceControllable, pitchAmplitudeControllable;
-    private float rotationSpeedMain, rotationSpeedSub, pitchEquilibrium, pitchAmplitude, maxPhaseDifference;
+    private final Controllable rotationSpeedMainControllable, rotationSpeedSubControllable,
+        pitchFrequencyControllable, pitchEquilibriumControllable, maxPhaseDifferenceControllable, pitchAmplitudeControllable;
+    private float rotationSpeedMainValue, rotationSpeedSub, pitchFrequency, pitchEquilibrium, pitchAmplitude, maxPhaseDifference;
+    private boolean paused;
 
     public Controller() {
         stage = new Stage();
@@ -51,6 +54,9 @@ public class Controller {
         rotationSpeedSubControllable = new Controllable(-2f, 2f, 0.1f, 1.2f, sliderStyle, progressStyle);
         rotationSpeedSubControllable.addNormalListener();
 
+        pitchFrequencyControllable = new Controllable(0.5f, 2f, 0.1f, 1f, sliderStyle, progressStyle);
+        pitchFrequencyControllable.addNormalListener();
+
         pitchEquilibriumControllable = new Controllable(-0.2f, 0.6f, 0.01f, 0.2f, sliderStyle, progressStyle);
         addListenerWithDependencyForAmplitudeRange();
 
@@ -60,20 +66,58 @@ public class Controller {
         maxPhaseDifferenceControllable = new Controllable(0, 4f * MathUtils.PI, 0.5f * MathUtils.PI, 0.5f * MathUtils.PI, sliderStyle, progressStyle);
         maxPhaseDifferenceControllable.addNormalListener();
 
-        table.left().bottom().pad(50);
+        table.left().bottom().pad(40);
         rotationSpeedMainControllable.addToTable(table);
         rotationSpeedSubControllable.addToTable(table);
+        pitchFrequencyControllable.addToTable(table);
         pitchEquilibriumControllable.addToTable(table);
         pitchAmplitudeControllable.addToTable(table);
         maxPhaseDifferenceControllable.addToTable(table);
 
+        table.row();
+        Button stopButton = getStopButton(sliderKnob);
+        table.add(stopButton).width(40).height(15).pad(2).colspan(2).center();
+
         stage.addActor(table);
 
-        rotationSpeedMain = rotationSpeedMainControllable.getTargetValue();
+        rotationSpeedMainValue = rotationSpeedMainControllable.getTargetValue();
         rotationSpeedSub = rotationSpeedSubControllable.getTargetValue();
+        pitchFrequency = pitchFrequencyControllable.getTargetValue();
         pitchEquilibrium = pitchEquilibriumControllable.getTargetValue();
         pitchAmplitude = pitchAmplitudeControllable.getTargetValue();
         maxPhaseDifference = maxPhaseDifferenceControllable.getTargetValue();
+
+        paused = false;
+    }
+
+    private Button getStopButton(Drawable sliderKnob) {
+        Button stopButton = new Button(new Button.ButtonStyle(sliderKnob, sliderKnob, sliderKnob));
+        stopButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                paused = !paused;
+                updateAfterPause();
+            }
+        });
+        return stopButton;
+    }
+
+    public void updateAfterPause() {
+        if (paused) {
+            rotationSpeedMainControllable.setToDefault();
+            rotationSpeedSubControllable.setToDefault();
+            pitchFrequencyControllable.setToDefault();
+            pitchEquilibriumControllable.setToDefault();
+            pitchAmplitudeControllable.setToDefault();
+            maxPhaseDifferenceControllable.setToDefault();
+        } else {
+            rotationSpeedMainControllable.setToZero();
+            rotationSpeedSubControllable.setToZero();
+            pitchFrequencyControllable.setToZero();
+            pitchEquilibriumControllable.setToMinimum();
+            pitchAmplitudeControllable.setToZero();
+            maxPhaseDifferenceControllable.setToZero();
+        }
     }
 
     private void addListenerWithDependencyForAmplitudeRange() {
@@ -95,23 +139,12 @@ public class Controller {
         pitchAmplitudeControllable.getLimitedSlider().setEffectiveMax(Math.min(distanceToMin, distanceToMax));
     }
 
-    public void update(float delta) {
-        stage.act(delta);
-    }
-
-    public void render() {
-        stage.draw();
-    }
-
-    public Stage getStage() {
-        return stage;
-    }
-
     public void updateTimeDependentValues() {
-        rotationSpeedMain = changeValue(rotationSpeedMain, rotationSpeedMainControllable.getTargetValue(), 0.005f);
+        rotationSpeedMainValue = changeValue(rotationSpeedMainValue, rotationSpeedMainControllable.getTargetValue(), 0.005f);
         rotationSpeedSub = changeValue(rotationSpeedSub, rotationSpeedSubControllable.getTargetValue(), 0.008f);
         pitchEquilibrium = changeValue(pitchEquilibrium, pitchEquilibriumControllable.getTargetValue(), 0.004f);
         pitchAmplitude = changeValue(pitchAmplitude, pitchAmplitudeControllable.getTargetValue(), 0.005f);
+        pitchFrequency = changeValue(pitchFrequency, pitchFrequencyControllable.getTargetValue(), 0.01f);
         maxPhaseDifference = changeValue(maxPhaseDifference, maxPhaseDifferenceControllable.getTargetValue(), 0.01f);
     }
 
@@ -126,8 +159,20 @@ public class Controller {
         return  value;
     }
 
+    public void update(float delta) {
+        stage.act(delta);
+    }
+
+    public void render() {
+        stage.draw();
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
     public float getRotationSpeedMain() {
-        return rotationSpeedMain;
+        return rotationSpeedMainValue;
     }
 
     public float getRotationSpeedSub() {
@@ -146,16 +191,21 @@ public class Controller {
         return maxPhaseDifference;
     }
 
+    public float getPitchFrequency() {
+        return pitchFrequency;
+    }
+
     public boolean isPhaseDifferenceNeedsChange() {
         return maxPhaseDifferenceControllable.getTargetValue() - maxPhaseDifference != 0;
     }
 
     public void drawTrueValues() {
-        rotationSpeedMainControllable.updateProgressBarValue(rotationSpeedMain);
+        rotationSpeedMainControllable.updateProgressBarValue(rotationSpeedMainValue);
         rotationSpeedSubControllable.updateProgressBarValue(rotationSpeedSub);
         pitchEquilibriumControllable.updateProgressBarValue(pitchEquilibrium);
         pitchAmplitudeControllable.updateProgressBarValue(pitchAmplitude);
         maxPhaseDifferenceControllable.updateProgressBarValue(maxPhaseDifference);
+        pitchFrequencyControllable.updateProgressBarValue(pitchFrequency);
     }
 
 }
