@@ -43,4 +43,7 @@ public class RotationArm {
         this.phaseDifference = phaseDifference;
     }
 
+    public SubRotationSystem getSubRotationSystem() {
+        return subRotationSystem;
+    }
 }

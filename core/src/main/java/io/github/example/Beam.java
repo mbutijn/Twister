@@ -19,7 +19,7 @@ public class Beam extends SimpleModel {
     private final Vector3 attachmentCylinder = new Vector3();
 
     public Beam() {
-        width = 6.5f;
+        width = 7.0f;
         height = 0.4f;
         depth = 0.4f;
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -33,7 +33,7 @@ public class Beam extends SimpleModel {
 
     public void update(float yawAngle, float pitch) {
         setAndRotateZY(rootHinge, 1, 0, 0, 0, yawAngle);
-        float length = 6;
+        float length = 6.5f;
         setAndRotateZY(tmpCorner, length, 0, 0, pitch, yawAngle);
 
         corner.set(rootHinge).add(tmpCorner);

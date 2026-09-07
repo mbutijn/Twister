@@ -90,7 +90,7 @@ public class Twister implements Screen, InputProcessor {
 
         modelBatch.end();
 
-//        shape.setProjectionMatrix(camera.combined);
+//        shape.setProjectionMatrix(twisterCamera.combined);
 //        shape.begin(ShapeRenderer.ShapeType.Line);
 //        drawAxes(shape);
 //        shape.setColor(Color.BLACK);
@@ -104,6 +104,9 @@ public class Twister implements Screen, InputProcessor {
         controller.update(delta);
         controller.drawTrueValues();
         controller.render();
+
+        SubRotationSystem srs = rotationArms.get(0).getSubRotationSystem();
+        twisterCamera.setOnRidePosition(srs.getOnRideCameraPosition(), srs.getOnRideCameraRotation());
     }
 
     private void drawAxes(ShapeRenderer shape) {
@@ -173,6 +176,10 @@ public class Twister implements Screen, InputProcessor {
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             paused = !paused;
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.C)) {
+            twisterCamera.toggleInRide();
         }
         return false;
     }
