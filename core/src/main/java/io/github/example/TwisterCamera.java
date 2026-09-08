@@ -121,4 +121,8 @@ public class TwisterCamera extends PerspectiveCamera {
         this.onRidePosition.set(onRidePosition);
         this.onRideRotation.set(onRideRotation);
     }
+
+    public boolean isOnRide() {
+        return onRide;
+    }
 }

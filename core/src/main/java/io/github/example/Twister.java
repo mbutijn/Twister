@@ -17,6 +17,7 @@ public class Twister implements Screen, InputProcessor {
     private float time = 0;
     private int touchDownY, touchDownX;
     private boolean paused;
+    private int onRideArmPosition = 0;
 
     public Twister() {
         twisterCamera = new TwisterCamera();
@@ -105,7 +106,7 @@ public class Twister implements Screen, InputProcessor {
         controller.drawTrueValues();
         controller.render();
 
-        SubRotationSystem srs = rotationArms.get(0).getSubRotationSystem();
+        SubRotationSystem srs = rotationArms.get(onRideArmPosition).getSubRotationSystem();
         twisterCamera.setOnRidePosition(srs.getOnRideCameraPosition(), srs.getOnRideCameraRotation());
     }
 
@@ -146,6 +147,8 @@ public class Twister implements Screen, InputProcessor {
     @Override
     public void resize(int width, int height) {
         twisterCamera.resize(width, height);
+        Gdx.gl.glViewport(0, 0, width, height);
+        controller.getStage().getViewport().update(width, height, true);
     }
 
     @Override
@@ -180,6 +183,14 @@ public class Twister implements Screen, InputProcessor {
 
         if (Gdx.input.isKeyPressed(Input.Keys.C)) {
             twisterCamera.toggleInRide();
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.V)) {
+            if (twisterCamera.isOnRide()) {
+                onRideArmPosition++;
+                if (onRideArmPosition >= rotationArms.size) {
+                    onRideArmPosition = 0;
+                }
+            }
         }
         return false;
     }
