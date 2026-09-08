@@ -2,27 +2,30 @@ package io.github.example;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 
 public class Twister implements Screen, InputProcessor {
+    private static final Environment environment = new Environment();
+    private static final Light light = new Light(environment);
+    private static final Ground ground = new Ground();
     private final TwisterCamera twisterCamera;
     private final Controller controller;
     private final ShapeRenderer shape;
     private final ModelBatch modelBatch = new ModelBatch();
     private final Root root = new Root();
     private final Array<RotationArm> rotationArms;
-    private final Ground ground;
     private float time = 0;
     private int touchDownY, touchDownX;
     private boolean paused;
     private int onRideArmPosition = 0;
+    private static boolean isDay = false;
 
     public Twister() {
         twisterCamera = new TwisterCamera();
         shape = new ShapeRenderer();
-        ground = new Ground();
         rotationArms = new Array<>();
         controller = new Controller();
         controller.updateTimeDependentValues();
@@ -54,7 +57,7 @@ public class Twister implements Screen, InputProcessor {
         twisterCamera.handleInput();
 
         // Clear screen
-        Gdx.gl.glClearColor(0.5f, 0.75f, 1.0f, 1.0f);
+        Gdx.gl.glClearColor(isDay ? 0.5f : 0.05f, isDay ?  0.75f : 0.05f, isDay ? 1.0f : 0.1f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         float dt = Gdx.graphics.getDeltaTime();
 
@@ -66,6 +69,9 @@ public class Twister implements Screen, InputProcessor {
 
             float speed = dt * controller.getRotationSpeedMain();
             time += dt * controller.getPitchFrequency();
+            if (!isDay) {
+                light.update(time);
+            }
 
             root.update(speed);
             for (RotationArm rotationArm : rotationArms) {
@@ -78,15 +84,15 @@ public class Twister implements Screen, InputProcessor {
         ground.render(modelBatch);
 
         for (RotationArm rotationArm : rotationArms) {
-            rotationArm.getBeam().draw(modelBatch);
-            rotationArm.drawHydraulics(modelBatch);
+            rotationArm.getBeam().draw(modelBatch, environment);
+            rotationArm.drawHydraulics(modelBatch, environment);
         }
 
-        root.render(modelBatch);
+        root.render(modelBatch, environment);
 
         // render the car systems
         for (RotationArm rotationArm : rotationArms) {
-            rotationArm.renderSubRotationSystem(twisterCamera.getPerspectiveCamera(), dt);
+            rotationArm.renderSubRotationSystem(twisterCamera.getPerspectiveCamera(), environment, dt);
         }
 
         modelBatch.end();
@@ -108,6 +114,12 @@ public class Twister implements Screen, InputProcessor {
 
         SubRotationSystem srs = rotationArms.get(onRideArmPosition).getSubRotationSystem();
         twisterCamera.setOnRidePosition(srs.getOnRideCameraPosition(), srs.getOnRideCameraRotation());
+    }
+
+    static void switchDayNight() {
+        isDay = !isDay;
+        light.switchDayNight(isDay);
+        ground.switchDayNight(isDay);
     }
 
     private void drawAxes(ShapeRenderer shape) {

@@ -2,10 +2,7 @@ package io.github.example;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
@@ -49,8 +46,8 @@ public class Beam extends SimpleModel {
         setAndRotateZY(attachmentCylinder, 0, -0.25f, 0, pitch, yawAngle);
     }
 
-    public void draw(ModelBatch modelBatch) {
-        modelBatch.render(box);
+    public void draw(ModelBatch modelBatch, Environment environment) {
+        modelBatch.render(box, environment);
     }
 
     public Vector3 getEnd() {

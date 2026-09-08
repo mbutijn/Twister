@@ -1,6 +1,7 @@
 package io.github.example;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.MathUtils;
 
@@ -27,12 +28,12 @@ public class RotationArm {
         hydraulicCylinder.update(yawAngle, beam.getAttachment(), beam.getRootHinge());
     }
 
-    public void drawHydraulics(ModelBatch modelBatch) {
-        hydraulicCylinder.draw(modelBatch);
+    public void drawHydraulics(ModelBatch modelBatch, Environment environment) {
+        hydraulicCylinder.draw(modelBatch, environment);
     }
 
-    public void renderSubRotationSystem(PerspectiveCamera camera, float dt) {
-        subRotationSystem.render(camera, dt);
+    public void renderSubRotationSystem(PerspectiveCamera camera, Environment environment, float dt) {
+        subRotationSystem.render(camera, environment, dt);
     }
 
     public Beam getBeam() {

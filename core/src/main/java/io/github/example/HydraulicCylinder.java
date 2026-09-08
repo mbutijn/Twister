@@ -2,10 +2,7 @@ package io.github.example;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
@@ -51,8 +48,8 @@ public class HydraulicCylinder extends SimpleModel {
         cylinderUp.transform.rotateRad(Vector3.Z, pitch);
     }
 
-    public void draw(ModelBatch modelBatch) {
-        modelBatch.render(cylinderDown);
-        modelBatch.render(cylinderUp);
+    public void draw(ModelBatch modelBatch, Environment environment) {
+        modelBatch.render(cylinderDown, environment);
+        modelBatch.render(cylinderUp, environment);
     }
 }

@@ -2,10 +2,7 @@ package io.github.example;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
@@ -33,7 +30,7 @@ public class Root extends SimpleModel {
         box.transform.setTranslation(0, -1, 0);
     }
 
-    public void render(ModelBatch modelBatch){
-        modelBatch.render(box);
+    public void render(ModelBatch modelBatch, Environment environment) {
+        modelBatch.render(box, environment);
     }
 }

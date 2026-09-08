@@ -78,6 +78,15 @@ public class Controller {
         Button stopButton = getStopButton(sliderKnob);
         table.add(stopButton).width(40).height(15).pad(2).colspan(2).center();
 
+        Button dayNightButton = new Button(new Button.ButtonStyle(sliderKnob, sliderKnob, sliderKnob));
+        dayNightButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Twister.switchDayNight();
+            }
+        });
+        table.add(dayNightButton).width(40).height(15).pad(2).colspan(2).center();
+
         stage.addActor(table);
 
         rotationSpeedMainValue = rotationSpeedMainControllable.getTargetValue();

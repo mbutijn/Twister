@@ -2,6 +2,8 @@ package io.github.example;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.Quaternion;
@@ -62,10 +64,11 @@ public class SubRotationSystem {
         onRideCameraPosition.set(seatPosition.add(position));
     }
 
-    public void render(PerspectiveCamera camera, float dt) {
+    public void render(PerspectiveCamera camera, Environment environment, float dt) {
         sceneManager.setCamera(camera);
         sceneManager.update(dt);
         sceneManager.render();
+        sceneManager.environment = environment;
     }
 
     public Vector3 getOnRideCameraPosition() {
