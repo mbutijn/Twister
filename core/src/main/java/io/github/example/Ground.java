@@ -16,7 +16,7 @@ public class Ground {
 
     public Ground() {
         Model groundModel = new ModelBuilder().createCylinder(150f, 0.1f, 150f, 20,  // depth
-            new Material(ColorAttribute.createDiffuse(nightColor)),
+            new Material(ColorAttribute.createDiffuse(dayColor)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
         ground = new ModelInstance(groundModel);

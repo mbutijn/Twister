@@ -21,7 +21,7 @@ public class Twister implements Screen, InputProcessor {
     private int touchDownY, touchDownX;
     private boolean paused;
     private int onRideArmPosition = 0;
-    private static boolean isDay = false;
+    private static boolean isDay = true;
 
     public Twister() {
         twisterCamera = new TwisterCamera();

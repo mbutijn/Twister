@@ -12,6 +12,7 @@ public class HydraulicCylinder extends SimpleModel {
     private final ModelInstance cylinderDown, cylinderUp;
     private final Vector3 attachmentRoot = new Vector3();
     private final Vector3 midPointUpCylinder = new Vector3();
+    private final Hinge root;
 
     public HydraulicCylinder() {
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -27,6 +28,8 @@ public class HydraulicCylinder extends SimpleModel {
 
         cylinderDown = new ModelInstance(cylinderLow);
         cylinderUp = new ModelInstance(cylinderHigh);
+
+        root = new Hinge(0.5f, 0.5f, 0.5f, Color.DARK_GRAY);
     }
 
     public void update(float yawAngle, Vector3 beamAttachment, Vector3 rootHinge) {
@@ -46,10 +49,13 @@ public class HydraulicCylinder extends SimpleModel {
         cylinderUp.transform.translate(beamAttachment.add(rootHinge).sub(midPointUpCylinder));
         cylinderUp.transform.rotateRad(Vector3.Y, yawAngle);
         cylinderUp.transform.rotateRad(Vector3.Z, pitch);
+
+        root.update(yawAngle, pitch, attachmentRoot.add(rootHinge));
     }
 
     public void draw(ModelBatch modelBatch, Environment environment) {
         modelBatch.render(cylinderDown, environment);
         modelBatch.render(cylinderUp, environment);
+        root.render(modelBatch, environment);
     }
 }

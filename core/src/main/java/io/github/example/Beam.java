@@ -13,7 +13,9 @@ public class Beam extends SimpleModel {
     private final Vector3 end = new Vector3();
     private final Vector3 tmpCorner = new Vector3();
     private final Vector3 tmpEnd = new Vector3();
+    private final Vector3 offsetCylinder = new Vector3();
     private final Vector3 attachmentCylinder = new Vector3();
+    private final Hinge cylinder, root;
 
     public Beam() {
         width = 7.0f;
@@ -26,6 +28,8 @@ public class Beam extends SimpleModel {
         );
 
         box = new ModelInstance(boxModel);
+        cylinder = new Hinge(0.4f, 0.4f, 0.4f, Color.GRAY);
+        root = new Hinge(0.7f, 0.7f, 0.7f, Color.DARK_GRAY);
     }
 
     public void update(float yawAngle, float pitch) {
@@ -43,11 +47,17 @@ public class Beam extends SimpleModel {
         setAndRotateZY(tmpEnd, length, standardLength, 0, pitch, yawAngle);
         end.set(rootHinge).add(tmpEnd);
 
-        setAndRotateZY(attachmentCylinder, 0, -0.25f, 0, pitch, yawAngle);
+        setAndRotateZY(offsetCylinder, 0, -0.25f, 0, pitch, yawAngle);
+        attachmentCylinder.set(corner.cpy().sub(rootHinge).scl(0.75f).add(offsetCylinder));
+
+        cylinder.update(yawAngle, pitch, attachmentCylinder.cpy().add(rootHinge));
+        root.update(yawAngle, pitch, rootHinge);
     }
 
     public void draw(ModelBatch modelBatch, Environment environment) {
         modelBatch.render(box, environment);
+        cylinder.render(modelBatch, environment);
+        root.render(modelBatch, environment);
     }
 
     public Vector3 getEnd() {
@@ -55,7 +65,7 @@ public class Beam extends SimpleModel {
     }
 
     public Vector3 getAttachment() {
-        return corner.cpy().sub(rootHinge).scl(0.75f).add(attachmentCylinder);
+        return attachmentCylinder;
     }
 
     public Vector3 getRootHinge() {
