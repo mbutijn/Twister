@@ -56,7 +56,7 @@ configure(subprojects) {
 
 subprojects {
   version = "$projectVersion"
-  ext.appName = 'spider'
+  ext.appName = 'twister'
   repositories {
     mavenCentral()
 //    maven { url 'https://s01.oss.sonatype.org' }

@@ -28,8 +28,8 @@ public class Beam extends SimpleModel {
         );
 
         box = new ModelInstance(boxModel);
-        cylinder = new Hinge(0.4f, 0.4f, 0.4f, Color.GRAY);
-        root = new Hinge(0.7f, 0.7f, 0.7f, Color.DARK_GRAY);
+        cylinder = new Hinge(0.3f, 0.3f, 0.1f, Color.GRAY);
+        root = new Hinge(0.7f, 0.8f, 0.2f, Color.DARK_GRAY);
     }
 
     public void update(float yawAngle, float pitch) {
