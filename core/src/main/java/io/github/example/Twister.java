@@ -30,17 +30,24 @@ public class Twister implements Screen, InputProcessor {
         controller = new Controller();
         controller.updateTimeDependentValues();
 
-        Array<String> colors = new Array<>();
-        colors.add("red");
-        colors.add("yellow");
-        colors.add("green");
-        colors.add("blue");
+        Array<String> colorsString = new Array<>();
+        colorsString.add("red");
+        colorsString.add("yellow");
+        colorsString.add("green");
+        colorsString.add("blue");
+
+        Array<Color> colors = new Array<>();
+        colors.add(new Color(0.6f, 0.3f, 0.1f, 1f));
+        colors.add(new Color(0.6f, 0.6f, 0.1f, 1f));
+        colors.add(new Color(0.3f, 0.6f, 0.3f, 1f));
+        colors.add(new Color(0.3f, 0.3f, 0.6f, 1f));
 
         int numberOfArms = 4;
         for (int i = 0; i < numberOfArms; i++) {
             rotationArms.add(new RotationArm(
                 (float) (i * 2 * Math.PI / numberOfArms),
                 i * controller.getMaxPhaseDifference() / numberOfArms,
+                colorsString.get(i),
                 colors.get(i)));
         }
 

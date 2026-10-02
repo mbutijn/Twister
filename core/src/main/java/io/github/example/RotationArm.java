@@ -1,5 +1,6 @@
 package io.github.example;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -12,12 +13,12 @@ public class RotationArm {
     private float yawAngle;
     private float phaseDifference;
 
-    public RotationArm(float yawAngle, float phaseDifference, String color) {
+    public RotationArm(float yawAngle, float phaseDifference, String colorString, Color color) {
         this.yawAngle = yawAngle;
         this.phaseDifference = phaseDifference;
-        this.beam = new Beam();
-        this.subRotationSystem = new SubRotationSystem(color);
-        this.hydraulicCylinder = new HydraulicCylinder();
+        this.beam = new Beam(color);
+        this.subRotationSystem = new SubRotationSystem(colorString);
+        this.hydraulicCylinder = new HydraulicCylinder(color);
     }
 
     public void update(float time, float yawAngleIncrease, float rotationSpeedSub, float pitchEquilibrium, float pitchAmplitude) {

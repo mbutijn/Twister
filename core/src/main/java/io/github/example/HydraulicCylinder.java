@@ -14,11 +14,11 @@ public class HydraulicCylinder extends SimpleModel {
     private final Vector3 midPointUpCylinder = new Vector3();
     private final Hinge root;
 
-    public HydraulicCylinder() {
+    public HydraulicCylinder(Color color) {
         ModelBuilder modelBuilder = new ModelBuilder();
 
         Model cylinderLow = modelBuilder.createCylinder(0.4f, 2f, 0.4f, 12,
-            new Material(ColorAttribute.createDiffuse(Color.GRAY)),
+            new Material(ColorAttribute.createDiffuse(color)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
         );
         Model cylinderHigh = modelBuilder.createCylinder(0.2f, 4f, 0.2f, 12,
@@ -29,7 +29,7 @@ public class HydraulicCylinder extends SimpleModel {
         cylinderDown = new ModelInstance(cylinderLow);
         cylinderUp = new ModelInstance(cylinderHigh);
 
-        root = new Hinge(0.4f, 0.7f, 0.2f, Color.DARK_GRAY);
+        root = new Hinge(0.5f, 0.7f, 0.2f, Color.LIGHT_GRAY, Color.DARK_GRAY);
     }
 
     public void update(float yawAngle, Vector3 beamAttachment, Vector3 rootHinge) {

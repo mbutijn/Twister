@@ -17,19 +17,19 @@ public class Beam extends SimpleModel {
     private final Vector3 attachmentCylinder = new Vector3();
     private final Hinge cylinder, root;
 
-    public Beam() {
+    public Beam(Color color) {
         width = 7.0f;
         height = 0.4f;
         depth = 0.4f;
         ModelBuilder modelBuilder = new ModelBuilder();
         Model boxModel = modelBuilder.createBox(width, height, depth,
-            new Material(ColorAttribute.createDiffuse(Color.GRAY)),
+            new Material(ColorAttribute.createDiffuse(color)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
         );
 
         box = new ModelInstance(boxModel);
-        cylinder = new Hinge(0.3f, 0.3f, 0.1f, Color.GRAY);
-        root = new Hinge(0.7f, 0.8f, 0.2f, Color.DARK_GRAY);
+        cylinder = new Hinge(0.2f, 0.3f, 0.1f, Color.LIGHT_GRAY, color);
+        root = new Hinge(0.7f, 0.8f, 0.2f, color, Color.DARK_GRAY);
     }
 
     public void update(float yawAngle, float pitch) {

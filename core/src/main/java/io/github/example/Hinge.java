@@ -16,11 +16,11 @@ public class Hinge {
     private final Vector3 rightOffset = new Vector3(0, 0, 0);
     private final float height;
 
-    public Hinge(float radius, float height, float ringThickness, Color color) {
+    public Hinge(float radius, float height, float ringThickness, Color pinColor, Color ringColor) {
         this.height = height;
-        this.pin = makeModelInstance(radius, height, color);
-        this.leftRing = makeModelInstance(1.2f * radius, ringThickness, color);
-        this.rightRing = makeModelInstance(1.2f * radius, ringThickness, color);
+        this.pin = makeModelInstance(radius, height, pinColor);
+        this.leftRing = makeModelInstance(1.3f * radius, ringThickness, ringColor);
+        this.rightRing = makeModelInstance(1.3f * radius, ringThickness, ringColor);
     }
 
     public ModelInstance makeModelInstance(float radius, float height, Color color) {
