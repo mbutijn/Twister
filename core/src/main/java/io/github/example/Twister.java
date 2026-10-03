@@ -22,6 +22,7 @@ public class Twister implements Screen, InputProcessor {
     private boolean paused;
     private int onRideArmPosition = 0;
     private static boolean isDay = true;
+    private boolean showAxis = false;
 
     public Twister() {
         twisterCamera = new TwisterCamera();
@@ -84,6 +85,8 @@ public class Twister implements Screen, InputProcessor {
             for (RotationArm rotationArm : rotationArms) {
                 rotationArm.update(time, speed, controller.getRotationSpeedSub() * dt, controller.getPitchEquilibrium(), controller.getPitchAmplitude());
             }
+
+            controller.handleStoppingStatus(getAngle(), rotationArms.get(0).getSubRotationSystem().getYawAngleDifference());
 //            paused = true;
         }
 
@@ -104,16 +107,18 @@ public class Twister implements Screen, InputProcessor {
 
         modelBatch.end();
 
-//        shape.setProjectionMatrix(twisterCamera.combined);
-//        shape.begin(ShapeRenderer.ShapeType.Line);
-//        drawAxes(shape);
-//        shape.setColor(Color.BLACK);
-//        root.drawBoxEdges(shape);
+        if (showAxis) {
+            shape.setProjectionMatrix(twisterCamera.combined);
+            shape.begin(ShapeRenderer.ShapeType.Line);
+            drawAxes(shape);
+//            shape.setColor(Color.BLACK);
+//            root.drawBoxEdges(shape);
 //
-//        for (RotationArm rotationArm : rotationArms) {
-//            rotationArm.getBeam().drawBoxEdges(shape);
-//        }
-//        shape.end();
+//            for (RotationArm rotationArm : rotationArms) {
+//                rotationArm.getBeam().drawBoxEdges(shape);
+//            }
+            shape.end();
+        }
 
         controller.update(delta);
         controller.drawTrueValues();
@@ -157,6 +162,10 @@ public class Twister implements Screen, InputProcessor {
             int i = rotationArms.indexOf(rotationArm, true);
             rotationArm.setPhaseDifference(i * controller.getMaxPhaseDifference() / numberOfArms);
         }
+    }
+
+    public float getAngle() {
+        return rotationArms.get(0).getYawAngle();
     }
 
     @Override
@@ -210,6 +219,9 @@ public class Twister implements Screen, InputProcessor {
                     onRideArmPosition = 0;
                 }
             }
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.F2)) {
+            showAxis = !showAxis;
         }
         return false;
     }

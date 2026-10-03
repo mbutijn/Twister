@@ -3,7 +3,6 @@ package io.github.example;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.Quaternion;
@@ -16,6 +15,7 @@ public class SubRotationSystem {
     private final Scene scene;
     private final SceneManager sceneManager;
     private float yawAngle;
+    private float yawAngleDifference;
     private final Vector3 onRideCameraPosition = new Vector3();
     private final Vector3 seatPosition = new Vector3();
     private final Quaternion rot = new Quaternion();
@@ -42,7 +42,7 @@ public class SubRotationSystem {
 
     public void update(Vector3 position, float pitch, float yawAngleIncrease, float yawAngleBeam) {
         this.yawAngle += yawAngleIncrease;
-        float yawAngleDifference = yawAngleBeam - yawAngle;
+        yawAngleDifference = yawAngleBeam - yawAngle;
         float pitchLocal = pitch * MathUtils.cos(yawAngleDifference);
 
         scene.modelInstance.transform.idt();
@@ -77,5 +77,13 @@ public class SubRotationSystem {
 
     public Quaternion getOnRideCameraRotation() {
         return rot.cpy();
+    }
+
+    public float getYawAngle() {
+        return yawAngle;
+    }
+
+    public float getYawAngleDifference() {
+        return yawAngleDifference;
     }
 }

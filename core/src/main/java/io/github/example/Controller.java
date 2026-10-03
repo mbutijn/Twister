@@ -11,13 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 
 public class Controller {
     private final Stage stage;
     private final Controllable rotationSpeedMainControllable, rotationSpeedSubControllable,
         pitchFrequencyControllable, pitchEquilibriumControllable, maxPhaseDifferenceControllable, pitchAmplitudeControllable;
+    private final Array<Controllable> controllables;
     private float rotationSpeedMainValue, rotationSpeedSub, pitchFrequency, pitchEquilibrium, pitchAmplitude, maxPhaseDifference;
-    private boolean paused;
+    private Status status;
 
     public Controller() {
         stage = new Stage();
@@ -66,17 +68,22 @@ public class Controller {
         maxPhaseDifferenceControllable = new Controllable(0, 4f * MathUtils.PI, 0.5f * MathUtils.PI, 0.5f * MathUtils.PI, sliderStyle, progressStyle);
         maxPhaseDifferenceControllable.addNormalListener();
 
+        controllables = new Array<>();
+        controllables.add(rotationSpeedMainControllable);
+        controllables.add(rotationSpeedSubControllable);
+        controllables.add(pitchFrequencyControllable);
+        controllables.add(pitchEquilibriumControllable);
+        controllables.add(pitchAmplitudeControllable);
+        controllables.add(maxPhaseDifferenceControllable);
+
         table.left().bottom().pad(40);
-        rotationSpeedMainControllable.addToTable(table);
-        rotationSpeedSubControllable.addToTable(table);
-        pitchFrequencyControllable.addToTable(table);
-        pitchEquilibriumControllable.addToTable(table);
-        pitchAmplitudeControllable.addToTable(table);
-        maxPhaseDifferenceControllable.addToTable(table);
+        for (Controllable controllable : controllables) {
+            controllable.addToTable(table);
+        }
 
         table.row();
-        Button stopButton = getStopButton(sliderKnob);
-        table.add(stopButton).width(40).height(15).pad(2).colspan(2).center();
+        Button changeStatusButton = getChangeStatusButton(sliderKnob);
+        table.add(changeStatusButton).width(40).height(15).pad(2).colspan(2).center();
 
         Button dayNightButton = new Button(new Button.ButtonStyle(sliderKnob, sliderKnob, sliderKnob));
         dayNightButton.addListener(new ChangeListener() {
@@ -96,37 +103,31 @@ public class Controller {
         pitchAmplitude = pitchAmplitudeControllable.getTargetValue();
         maxPhaseDifference = maxPhaseDifferenceControllable.getTargetValue();
 
-        paused = false;
+        status = Status.RUNNING;
     }
 
-    private Button getStopButton(Drawable sliderKnob) {
-        Button stopButton = new Button(new Button.ButtonStyle(sliderKnob, sliderKnob, sliderKnob));
-        stopButton.addListener(new ChangeListener() {
+    private Button getChangeStatusButton(Drawable sliderKnob) {
+        Button button = new Button(new Button.ButtonStyle(sliderKnob, sliderKnob, sliderKnob));
+        button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                paused = !paused;
-                updateAfterPause();
+                if (status == Status.RUNNING) {
+                    status = Status.STOPPING;
+                    setSlidersDisabled(true);
+                    pitchFrequencyControllable.setToZero();
+                    pitchEquilibriumControllable.setToMinimum();
+                    pitchAmplitudeControllable.setToZero();
+                    maxPhaseDifferenceControllable.setToZero();
+                } else if (status == Status.PAUSED) {
+                    status = Status.RUNNING;
+                    setSlidersDisabled(false);
+                    for (Controllable controllable : controllables) {
+                        controllable.setToDefault();
+                    }
+                }
             }
         });
-        return stopButton;
-    }
-
-    public void updateAfterPause() {
-        if (paused) {
-            rotationSpeedMainControllable.setToDefault();
-            rotationSpeedSubControllable.setToDefault();
-            pitchFrequencyControllable.setToDefault();
-            pitchEquilibriumControllable.setToDefault();
-            pitchAmplitudeControllable.setToDefault();
-            maxPhaseDifferenceControllable.setToDefault();
-        } else {
-            rotationSpeedMainControllable.setToZero();
-            rotationSpeedSubControllable.setToZero();
-            pitchFrequencyControllable.setToZero();
-            pitchEquilibriumControllable.setToMinimum();
-            pitchAmplitudeControllable.setToZero();
-            maxPhaseDifferenceControllable.setToZero();
-        }
+        return button;
     }
 
     private void addListenerWithDependencyForAmplitudeRange() {
@@ -168,6 +169,38 @@ public class Controller {
         return  value;
     }
 
+    public void handleStoppingStatus(float angleMain, float angleSub) {
+        if (status == Status.STOPPING) {
+            float stepMain = rotationSpeedMainControllable.getSlider().getStepSize();
+            stepMain = rotationSpeedMainValue > 0 ? stepMain : -stepMain;
+            boolean mainArmAlignedAndSlow = angleMain % (0.5f * MathUtils.PI) < 0.01f && Math.abs(rotationSpeedMainValue) <= Math.abs(stepMain);
+            if (mainArmAlignedAndSlow) {
+                setRotationSpeedMainTarget(0);
+            } else {
+                setRotationSpeedMainTarget(stepMain);
+            }
+
+            float stepSub = rotationSpeedSubControllable.getSlider().getStepSize();
+            stepSub = rotationSpeedSub > 0 ? stepSub : -stepSub;
+            boolean subArmAlignedAndSlow = Math.abs(angleSub + 0.25f * MathUtils.PI)  % (0.5f * MathUtils.PI) < 0.01f && Math.abs(rotationSpeedSub) <= Math.abs(stepSub);
+            if (subArmAlignedAndSlow) {
+                setRotationSpeedSubTarget(0);
+            } else {
+                setRotationSpeedSubTarget(stepSub);
+            }
+
+            if (mainArmAlignedAndSlow && subArmAlignedAndSlow) {
+                status = Status.PAUSED;
+            }
+        }
+    }
+
+    public void setSlidersDisabled(boolean disabled) {
+        for (Controllable controllable : controllables) {
+            controllable.getSlider().setDisabled(disabled);
+        }
+    }
+
     public void update(float delta) {
         stage.act(delta);
     }
@@ -178,6 +211,16 @@ public class Controller {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public void setRotationSpeedMainTarget(float rotationSpeedMain) {
+        rotationSpeedMainControllable.setTargetValue(rotationSpeedMain);
+        rotationSpeedMainControllable.getSlider().setValue(rotationSpeedMain);
+    }
+
+    public void setRotationSpeedSubTarget(float rotationSpeedSub) {
+        rotationSpeedSubControllable.setTargetValue(rotationSpeedSub);
+        rotationSpeedSubControllable.getSlider().setValue(rotationSpeedSub);
     }
 
     public float getRotationSpeedMain() {

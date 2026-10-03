@@ -48,4 +48,8 @@ public class RotationArm {
     public SubRotationSystem getSubRotationSystem() {
         return subRotationSystem;
     }
+
+    public float getYawAngle() {
+        return yawAngle;
+    }
 }
