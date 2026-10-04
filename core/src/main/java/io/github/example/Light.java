@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.MathUtils;
 
 public class Light {
-    private final PointLight pointLight;
+    private final PointLight pointLight1;
     private final Color lightColor;
 
     public Light(Environment environment) {
@@ -17,11 +17,14 @@ public class Light {
             0, -1f, 0); // direction
         sun.color.set(10f, 10f, 10f, 1f);
         lightColor = new Color(1f, 1f, 1f, 1f);
-        pointLight = new PointLight();
-        pointLight.set(lightColor, 10, 5f, 0, 250f);
+        pointLight1 = new PointLight();
+        PointLight pointLight2 = new PointLight();
+        pointLight1.set(lightColor, 10, 5f, 0, 250f);
+        pointLight2.set(lightColor, -10, 5f, 0, 250f);
 
         environment.add(sun);
-        environment.add(pointLight);
+        environment.add(pointLight1);
+        environment.add(pointLight2);
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
     }
 
@@ -29,14 +32,14 @@ public class Light {
         lightColor.set(0.5f + 0.5f * MathUtils.cos(6 * time),
             0.6f + 0.4f * MathUtils.cos(4 * time),
             0.5f + 0.5f * MathUtils.sin(2 * time), 1f);
-        pointLight.setColor(lightColor);
-        pointLight.intensity = 600f + 300f * MathUtils.cos(5 * time);
+        pointLight1.setColor(lightColor);
+        pointLight1.intensity = 600f + 300f * MathUtils.cos(5 * time);
     }
 
     public void switchDayNight(boolean isDay) {
         if (isDay) {
-            pointLight.setIntensity(250f);
-            pointLight.setColor(Color.WHITE);
+            pointLight1.setIntensity(250f);
+            pointLight1.setColor(Color.WHITE);
         }
     }
 }

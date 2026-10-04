@@ -50,22 +50,22 @@ public class Controller {
         progressStyle.knob = progressKnob;
 
         // Add the ui elements
-        rotationSpeedMainControllable = new Controllable(-1.2f, 1.2f, 0.05f, 0.75f, sliderStyle, progressStyle);
+        rotationSpeedMainControllable = new Controllable(-1.2f, 1.2f, 0.05f, 0.75f, 0, sliderStyle, progressStyle);
         rotationSpeedMainControllable.addNormalListener();
 
-        rotationSpeedSubControllable = new Controllable(-2f, 2f, 0.1f, 1.2f, sliderStyle, progressStyle);
+        rotationSpeedSubControllable = new Controllable(-2f, 2f, 0.1f, 1.2f, 0, sliderStyle, progressStyle);
         rotationSpeedSubControllable.addNormalListener();
 
-        pitchFrequencyControllable = new Controllable(0.5f, 2f, 0.1f, 1f, sliderStyle, progressStyle);
+        pitchFrequencyControllable = new Controllable(0.5f, 2f, 0.1f, 1f, 0, sliderStyle, progressStyle);
         pitchFrequencyControllable.addNormalListener();
 
-        pitchEquilibriumControllable = new Controllable(-0.2f, 0.6f, 0.01f, 0.2f, sliderStyle, progressStyle);
+        pitchEquilibriumControllable = new Controllable(-0.2f, 0.6f, 0.01f, 0.2f, -0.2f, sliderStyle, progressStyle);
         addListenerWithDependencyForAmplitudeRange();
 
         pitchAmplitudeControllable = new Controllable(sliderStyle, progressStyle);
         pitchAmplitudeControllable.addNormalListener();
 
-        maxPhaseDifferenceControllable = new Controllable(0, 4f * MathUtils.PI, 0.5f * MathUtils.PI, 0.5f * MathUtils.PI, sliderStyle, progressStyle);
+        maxPhaseDifferenceControllable = new Controllable(0, 4f * MathUtils.PI, 0.5f * MathUtils.PI, 0.5f * MathUtils.PI, 0, sliderStyle, progressStyle);
         maxPhaseDifferenceControllable.addNormalListener();
 
         controllables = new Array<>();
@@ -103,7 +103,8 @@ public class Controller {
         pitchAmplitude = pitchAmplitudeControllable.getTargetValue();
         maxPhaseDifference = maxPhaseDifferenceControllable.getTargetValue();
 
-        status = Status.RUNNING;
+        status = Status.PAUSED;
+        setSlidersDisabled(true);
     }
 
     private Button getChangeStatusButton(Drawable sliderKnob) {
