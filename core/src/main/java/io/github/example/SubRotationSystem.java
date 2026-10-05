@@ -37,7 +37,7 @@ public class SubRotationSystem {
         sceneManager = new SceneManager();
         sceneManager.addScene(scene);
 
-        yawAngle = 0;
+        yawAngle = 0.25f * MathUtils.PI;
     }
 
     public void update(Vector3 position, float pitch, float yawAngleIncrease, float yawAngleBeam) {

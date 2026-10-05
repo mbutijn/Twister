@@ -121,6 +121,7 @@ public class Controller {
                     maxPhaseDifferenceControllable.setToZero();
                 } else if (status == Status.PAUSED) {
                     status = Status.RUNNING;
+                    System.out.println("Running");
                     setSlidersDisabled(false);
                     for (Controllable controllable : controllables) {
                         controllable.setToDefault();
@@ -170,28 +171,48 @@ public class Controller {
         return  value;
     }
 
+    public float wrapZeroTwoPi(float angle) {
+        float twoPi = 2.0f * MathUtils.PI;
+        angle -= twoPi * MathUtils.floor(angle / twoPi);
+        return angle;
+    }
+
     public void handleStoppingStatus(float angleMain, float angleSub) {
         if (status == Status.STOPPING) {
-            float stepMain = rotationSpeedMainControllable.getSlider().getStepSize();
-            stepMain = rotationSpeedMainValue > 0 ? stepMain : -stepMain;
-            boolean mainArmAlignedAndSlow = angleMain % (0.5f * MathUtils.PI) < 0.01f && Math.abs(rotationSpeedMainValue) <= Math.abs(stepMain);
+            float minSpeedMain = rotationSpeedMainControllable.getSlider().getStepSize();
+            angleMain = wrapZeroTwoPi(angleMain);
+            boolean mainArmSlow = Math.abs(rotationSpeedMainValue) <= Math.abs(minSpeedMain);
+            if (mainArmSlow) {
+                if (angleMain % (0.5f * MathUtils.PI) < 0.25f * MathUtils.PI) {
+                    minSpeedMain = -minSpeedMain;
+                }
+            }
+            boolean mainArmAlignedAndSlow = angleMain % (0.5f * MathUtils.PI) < 0.01f && mainArmSlow;
             if (mainArmAlignedAndSlow) {
                 setRotationSpeedMainTarget(0);
             } else {
-                setRotationSpeedMainTarget(stepMain);
+                setRotationSpeedMainTarget(minSpeedMain);
             }
 
-            float stepSub = rotationSpeedSubControllable.getSlider().getStepSize();
-            stepSub = rotationSpeedSub > 0 ? stepSub : -stepSub;
-            boolean subArmAlignedAndSlow = Math.abs(angleSub + 0.25f * MathUtils.PI)  % (0.5f * MathUtils.PI) < 0.01f && Math.abs(rotationSpeedSub) <= Math.abs(stepSub);
+            float minSpeedSub = rotationSpeedSubControllable.getSlider().getStepSize();
+            angleSub = wrapZeroTwoPi(angleSub);
+            boolean subArmSlow = Math.abs(rotationSpeedSub) <= Math.abs(minSpeedSub);
+            if (subArmSlow) {
+                if (angleSub % (0.5f * MathUtils.PI) < 0.25f * MathUtils.PI) {
+                    minSpeedSub = -minSpeedSub;
+                }
+            }
+            float angleSubMod = angleSub % (0.5f * MathUtils.PI);
+            boolean subArmAlignedAndSlow = angleSubMod > 0.25 * MathUtils.PI - 0.01f && angleSubMod < 0.25 * MathUtils.PI + 0.01f && subArmSlow;
             if (subArmAlignedAndSlow) {
                 setRotationSpeedSubTarget(0);
             } else {
-                setRotationSpeedSubTarget(stepSub);
+                setRotationSpeedSubTarget(minSpeedSub);
             }
 
             if (mainArmAlignedAndSlow && subArmAlignedAndSlow) {
                 status = Status.PAUSED;
+                System.out.println("Paused");
             }
         }
     }
