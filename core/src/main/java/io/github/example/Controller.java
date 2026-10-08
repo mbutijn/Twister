@@ -115,17 +115,15 @@ public class Controller {
                 if (status == Status.RUNNING) {
                     status = Status.STOPPING;
                     setSlidersDisabled(true);
+                    System.out.println("Stopping");
                     pitchFrequencyControllable.setToZero();
                     pitchEquilibriumControllable.setToMinimum();
                     pitchAmplitudeControllable.setToZero();
                     maxPhaseDifferenceControllable.setToZero();
                 } else if (status == Status.PAUSED) {
-                    status = Status.RUNNING;
-                    System.out.println("Running");
-                    setSlidersDisabled(false);
-                    for (Controllable controllable : controllables) {
-                        controllable.setToDefault();
-                    }
+                    status = Status.STEPS_MOVING_DOWN;
+                    System.out.println("Steps are moving down");
+                    Twister.resetStepsTime();
                 }
             }
         });
@@ -211,10 +209,34 @@ public class Controller {
             }
 
             if (mainArmAlignedAndSlow && subArmAlignedAndSlow) {
-                status = Status.PAUSED;
-                System.out.println("Paused");
+                status = Status.STEPS_MOVING_UP;
+                Twister.resetStepsTime();
+                System.out.println("Steps are moving up");
             }
         }
+    }
+
+    public void handleBoardingStepStatus() {
+        if (status == Status.STEPS_MOVING_UP) {
+            setStatus(Status.PAUSED);
+            System.out.println("Paused");
+        } else if (status == Status.STEPS_MOVING_DOWN) {
+            setStatus(Status.RUNNING);
+            System.out.println("Running");
+            setSlidersDisabled(false);
+            for (Controllable controllable : controllables) {
+                controllable.setToDefault();
+            }
+        }
+    }
+
+    public void drawTrueValues() {
+        rotationSpeedMainControllable.updateProgressBarValue(rotationSpeedMainValue);
+        rotationSpeedSubControllable.updateProgressBarValue(rotationSpeedSub);
+        pitchEquilibriumControllable.updateProgressBarValue(pitchEquilibrium);
+        pitchAmplitudeControllable.updateProgressBarValue(pitchAmplitude);
+        maxPhaseDifferenceControllable.updateProgressBarValue(maxPhaseDifference);
+        pitchFrequencyControllable.updateProgressBarValue(pitchFrequency);
     }
 
     public void setSlidersDisabled(boolean disabled) {
@@ -229,6 +251,22 @@ public class Controller {
 
     public void render() {
         stage.draw();
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public boolean stepsMoving() {
+        return status == Status.STEPS_MOVING_UP || status == Status.STEPS_MOVING_DOWN;
+    }
+
+    public boolean notRunning() {
+        return status != Status.RUNNING && status != Status.STOPPING;
     }
 
     public Stage getStage() {
@@ -271,15 +309,6 @@ public class Controller {
 
     public boolean isPhaseDifferenceNeedsChange() {
         return maxPhaseDifferenceControllable.getTargetValue() - maxPhaseDifference != 0;
-    }
-
-    public void drawTrueValues() {
-        rotationSpeedMainControllable.updateProgressBarValue(rotationSpeedMainValue);
-        rotationSpeedSubControllable.updateProgressBarValue(rotationSpeedSub);
-        pitchEquilibriumControllable.updateProgressBarValue(pitchEquilibrium);
-        pitchAmplitudeControllable.updateProgressBarValue(pitchAmplitude);
-        maxPhaseDifferenceControllable.updateProgressBarValue(maxPhaseDifference);
-        pitchFrequencyControllable.updateProgressBarValue(pitchFrequency);
     }
 
 }

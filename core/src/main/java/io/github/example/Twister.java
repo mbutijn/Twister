@@ -11,12 +11,14 @@ public class Twister implements Screen, InputProcessor {
     private static final Environment environment = new Environment();
     private static final Light light = new Light(environment);
     private static final Ground ground = new Ground();
+    private static long timeStepBegin;
     private final TwisterCamera twisterCamera;
     private final Controller controller;
     private final ShapeRenderer shape;
     private final ModelBatch modelBatch = new ModelBatch();
     private final Root root = new Root();
     private final Array<RotationArm> rotationArms;
+    private final Array<BoardingStep> boardingSteps = new Array<>();
     private float time = 0;
     private int touchDownY, touchDownX;
     private boolean paused;
@@ -51,6 +53,11 @@ public class Twister implements Screen, InputProcessor {
                 colorsString.get(i),
                 colors.get(i)));
         }
+
+        boardingSteps.add(new BoardingStep(1, 1));
+        boardingSteps.add(new BoardingStep(1, -1));
+        boardingSteps.add(new BoardingStep(-1, 1));
+        boardingSteps.add(new BoardingStep(-1, -1));
 
         // Set up the input processor
         InputMultiplexer multiplexer = new InputMultiplexer();
@@ -87,6 +94,18 @@ public class Twister implements Screen, InputProcessor {
             }
 
             controller.handleStoppingStatus(getAngle(), rotationArms.get(0).getSubRotationSystem().getYawAngleDifference());
+
+            if (controller.stepsMoving()) {
+                long time = System.currentTimeMillis() - timeStepBegin;
+                for (BoardingStep boardingStep : boardingSteps) {
+                    boardingStep.update(controller.getStatus() == Status.STEPS_MOVING_UP ? time / 2000f : 1 - (time / 2000f));
+                }
+
+                if (time > 2000) {
+                    controller.handleBoardingStepStatus();
+                }
+            }
+
 //            paused = true;
         }
 
@@ -103,6 +122,12 @@ public class Twister implements Screen, InputProcessor {
         // render the car systems
         for (RotationArm rotationArm : rotationArms) {
             rotationArm.renderSubRotationSystem(twisterCamera.getPerspectiveCamera(), environment, dt);
+        }
+
+        if (controller.notRunning()) {
+            for (BoardingStep boardingStep : boardingSteps) {
+                boardingStep.draw(modelBatch, environment);
+            }
         }
 
         modelBatch.end();
@@ -126,6 +151,10 @@ public class Twister implements Screen, InputProcessor {
 
         SubRotationSystem srs = rotationArms.get(onRideArmPosition).getSubRotationSystem();
         twisterCamera.setOnRidePosition(srs.getOnRideCameraPosition(), srs.getOnRideCameraRotation());
+    }
+
+    public static void resetStepsTime() {
+        timeStepBegin = System.currentTimeMillis();
     }
 
     static void switchDayNight() {

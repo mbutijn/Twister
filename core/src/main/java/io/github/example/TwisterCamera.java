@@ -108,7 +108,7 @@ public class TwisterCamera extends PerspectiveCamera {
 
     public void handleScrolled(float amountY) {
         if (!onRide) {
-            distance += amountY;
+            distance *= amountY > 0 ? 1.05f : 0.95f;
         }
     }
 

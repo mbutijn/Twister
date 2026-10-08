@@ -1,5 +1,5 @@
 package io.github.example;
 
 public enum Status {
-    RUNNING, STOPPING, PAUSED //, STARTING
+    RUNNING, STOPPING, STEPS_MOVING_UP, PAUSED, STEPS_MOVING_DOWN
 }
