@@ -11,14 +11,14 @@ public class Twister implements Screen, InputProcessor {
     private static final Environment environment = new Environment();
     private static final Light light = new Light(environment);
     private static final Ground ground = new Ground();
-    private static long timeStepBegin;
+    private static long stairsStartMovingTime;
     private final TwisterCamera twisterCamera;
     private final Controller controller;
     private final ShapeRenderer shape;
     private final ModelBatch modelBatch = new ModelBatch();
     private final Root root = new Root();
     private final Array<RotationArm> rotationArms;
-    private final Array<BoardingStep> boardingSteps = new Array<>();
+    private final Array<BoardingStairs> boardingStairs = new Array<>();
     private float time = 0;
     private int touchDownY, touchDownX;
     private boolean paused;
@@ -54,10 +54,13 @@ public class Twister implements Screen, InputProcessor {
                 colors.get(i)));
         }
 
-        boardingSteps.add(new BoardingStep(1, 1));
-        boardingSteps.add(new BoardingStep(1, -1));
-        boardingSteps.add(new BoardingStep(-1, 1));
-        boardingSteps.add(new BoardingStep(-1, -1));
+        boardingStairs.add(new BoardingStairs(1, 1));
+        boardingStairs.add(new BoardingStairs(1, -1));
+        boardingStairs.add(new BoardingStairs(-1, 1));
+        boardingStairs.add(new BoardingStairs(-1, -1));
+        for (BoardingStairs boardingStairs : boardingStairs) {
+            boardingStairs.update(1);
+        }
 
         // Set up the input processor
         InputMultiplexer multiplexer = new InputMultiplexer();
@@ -96,9 +99,9 @@ public class Twister implements Screen, InputProcessor {
             controller.handleStoppingStatus(getAngle(), rotationArms.get(0).getSubRotationSystem().getYawAngleDifference());
 
             if (controller.stepsMoving()) {
-                long time = System.currentTimeMillis() - timeStepBegin;
-                for (BoardingStep boardingStep : boardingSteps) {
-                    boardingStep.update(controller.getStatus() == Status.STEPS_MOVING_UP ? time / 2000f : 1 - (time / 2000f));
+                long time = System.currentTimeMillis() - stairsStartMovingTime;
+                for (BoardingStairs boardingStairs : boardingStairs) {
+                    boardingStairs.update(controller.getStatus() == Status.STEPS_MOVING_UP ? time / 2000f : 1 - (time / 2000f));
                 }
 
                 if (time > 2000) {
@@ -125,8 +128,8 @@ public class Twister implements Screen, InputProcessor {
         }
 
         if (controller.notRunning()) {
-            for (BoardingStep boardingStep : boardingSteps) {
-                boardingStep.draw(modelBatch, environment);
+            for (BoardingStairs boardingStairs : boardingStairs) {
+                boardingStairs.draw(modelBatch, environment);
             }
         }
 
@@ -153,8 +156,8 @@ public class Twister implements Screen, InputProcessor {
         twisterCamera.setOnRidePosition(srs.getOnRideCameraPosition(), srs.getOnRideCameraRotation());
     }
 
-    public static void resetStepsTime() {
-        timeStepBegin = System.currentTimeMillis();
+    public static void resetStairsTime() {
+        stairsStartMovingTime = System.currentTimeMillis();
     }
 
     static void switchDayNight() {

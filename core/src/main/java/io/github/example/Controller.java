@@ -123,7 +123,7 @@ public class Controller {
                 } else if (status == Status.PAUSED) {
                     status = Status.STEPS_MOVING_DOWN;
                     System.out.println("Steps are moving down");
-                    Twister.resetStepsTime();
+                    Twister.resetStairsTime();
                 }
             }
         });
@@ -210,7 +210,7 @@ public class Controller {
 
             if (mainArmAlignedAndSlow && subArmAlignedAndSlow) {
                 status = Status.STEPS_MOVING_UP;
-                Twister.resetStepsTime();
+                Twister.resetStairsTime();
                 System.out.println("Steps are moving up");
             }
         }
